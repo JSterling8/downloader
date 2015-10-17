@@ -1,20 +1,26 @@
+import com.google.common.base.Stopwatch;
+
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by anon on 15/10/2015.
  */
 public class Main {
-    public static void main(String[] args)
-            throws MalformedURLException, IOException {
-        for(int i = 19088; i != 19087; i--) {
+    public static void main(String[] args) throws IOException {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        long totalTime = 0;
+        System.setProperty("http.agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.1");
+        int archiveDownloadAttempts = 0;
+
+        for(int i = 8990; i >= 9; i--, archiveDownloadAttempts++) {
             BufferedInputStream in = null;
             FileOutputStream fout = null;
             try {
-                System.setProperty("http.agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
 
                 in = new BufferedInputStream(new URL("http://www.hltv.org/interfaces/download.php?demoid=" + i).
                         openStream());
@@ -25,6 +31,24 @@ public class Main {
                 while ((count = in.read(data, 0, 1024)) != -1) {
                     fout.write(data, 0, count);
                 }
+
+                if(archiveDownloadAttempts % 10 == 0 && archiveDownloadAttempts != 0) {
+                    int downloadRangeTop = i + 9;
+
+                    System.out.println("Downloaded 10 more archives (" + i + " - " + downloadRangeTop + ")");
+                    System.out.println("Total downloaded this session: " + archiveDownloadAttempts);
+                    System.out.println("Time taken to download last 10 archives: " + stopwatch.elapsed(TimeUnit.SECONDS) + " seconds");
+
+                    totalTime += stopwatch.elapsed(TimeUnit.SECONDS);
+                    stopwatch.reset();
+                    stopwatch.start();
+                }
+            } catch (MalformedURLException e){
+                System.out.println("MalformedURLException on demoid: " + i);
+            } catch (IOException e){
+                System.out.println("IOException on demoid: " + i);
+            } catch (Exception e) {
+                System.out.println(e.getClass().toGenericString() + " on demoid: " + i);
             } finally {
                 if (in != null) {
                     in.close();
@@ -34,5 +58,8 @@ public class Main {
                 }
             }
         }
+
+        System.out.println("Program done.  Downloaded " + archiveDownloadAttempts + " archives in " +
+                totalTime + " seconds.");
     }
 }
