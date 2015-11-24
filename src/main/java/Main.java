@@ -36,7 +36,7 @@ public class Main {
                 if(demoName == null){
                     demoName = "id-" + i + "-";
                 }
-
+ 
                 in = new BufferedInputStream(url.openStream());
                 fout = new FileOutputStream("D:/demos/" + demoName);
 
