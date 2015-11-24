@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -17,14 +18,27 @@ public class Main {
         System.setProperty("http.agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.1");
         int archiveDownloadAttempts = 0;
 
-        for(int i = 8990; i >= 9; i--, archiveDownloadAttempts++) {
+        for(int i = 10; i >= 9; i--, archiveDownloadAttempts++) {
             BufferedInputStream in = null;
             FileOutputStream fout = null;
             try {
+                URL url = new URL("http://www.hltv.org/interfaces/download.php?demoid=" + i);
+                URLConnection conn = url.openConnection();
 
-                in = new BufferedInputStream(new URL("http://www.hltv.org/interfaces/download.php?demoid=" + i).
-                        openStream());
-                fout = new FileOutputStream("D:/demos/demo" + i + ".zip");
+                String demoName = null;
+
+                try {
+                    demoName = "id-" + i + "-" + conn.getHeaderField("content-disposition").substring(21);
+                } catch (NullPointerException | IndexOutOfBoundsException e){
+                    demoName = "id-" + i + "-";
+                }
+
+                if(demoName == null){
+                    demoName = "id-" + i + "-";
+                }
+
+                in = new BufferedInputStream(url.openStream());
+                fout = new FileOutputStream("D:/demos/" + demoName);
 
                 final byte data[] = new byte[1024];
                 int count;
