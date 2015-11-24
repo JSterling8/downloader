@@ -3,9 +3,9 @@ import com.google.common.base.Stopwatch;
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,8 +23,8 @@ public class Main {
             FileOutputStream fout = null;
             try {
                 URL url = new URL("http://www.hltv.org/interfaces/download.php?demoid=" + i);
-                URLConnection conn = url.openConnection();
-
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.disconnect();
                 String demoName = null;
 
                 try {
