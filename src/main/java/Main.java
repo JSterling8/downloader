@@ -1,9 +1,13 @@
 import com.google.common.base.Stopwatch;
+import org.apache.http.HeaderElement;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
@@ -23,20 +27,23 @@ public class Main {
             FileOutputStream fout = null;
             try {
                 URL url = new URL("http://www.hltv.org/interfaces/download.php?demoid=" + i);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.disconnect();
+                HttpClient client = HttpClientBuilder.create().build();
+                HttpHead request = new HttpHead("http://www.hltv.org/interfaces/download.php?demoid=" + i);
+                HttpResponse response = client.execute(request);
+
                 String demoName = null;
 
                 try {
-                    demoName = "id-" + i + "-" + conn.getHeaderField("content-disposition").substring(21);
-                } catch (NullPointerException | IndexOutOfBoundsException e){
+                    HeaderElement[] headerElements = response.getFirstHeader("content-disposition").getElements();
+                    demoName = headerElements[0].getParameterByName("filename").getValue();
+                } catch (Exception e){
                     demoName = "id-" + i + "-";
                 }
 
                 if(demoName == null){
                     demoName = "id-" + i + "-";
                 }
- 
+
                 in = new BufferedInputStream(url.openStream());
                 fout = new FileOutputStream("D:/demos/" + demoName);
 
